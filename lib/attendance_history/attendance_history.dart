@@ -118,143 +118,146 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // shared theme colors
+    const Color primary1 = Color(0xFF667EEA);
+    const Color primary2 = Color(0xFF764BA2);
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: const Color.fromARGB(255, 26, 0, 143),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        centerTitle: true,
-        title: const Text(
-          "Attendance History Menu",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: dataCollection.snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            var data = snapshot.data!.docs;
-            return data.isNotEmpty
-                ? ListView.builder(
-                  itemCount: data.length,
-                  itemBuilder: (context, index) {
-                    var docId = data[index].id;
-                    var name = data[index]['name'];
-                    var address = data[index]['address'];
-                    var description = data[index]['description'];
-                    var datetime = data[index]['datetime'];
+      backgroundColor: const Color(0xFFF8F9FA),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Gradient header
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(colors: [primary1, primary2], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                boxShadow: [BoxShadow(color: primary1.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 4))],
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  const SizedBox(width: 6),
+                  const Expanded(
+                    child: Text(
+                      'Attendance History',
+                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
-                    return Card(
-                      margin: const EdgeInsets.all(10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
+            // Content
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: dataCollection.snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Circle Avatar
-                            Container(
-                              height: 50,
-                              width: 50,
-                              decoration: BoxDecoration(
-                                color:
-                                    Colors.primaries[Random().nextInt(
-                                      Colors.primaries.length,
-                                    )],
-                                shape: BoxShape.circle,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  name[0].toUpperCase(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 19),
+                            const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
+                            const SizedBox(height: 10),
+                            Text('Terjadi kesalahan: ${snapshot.error}'),
+                          ],
+                        ),
+                      );
+                    }
 
-                            // Read Data
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.center, // Center vertikal
-                                children: [
-                                  Text(
-                                    "Name: $name",
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                  Text(
-                                    "Address: $address",
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                  Text(
-                                    "Description: $description",
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                  Text(
-                                    "Timestamp: $datetime",
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                ],
-                              ),
-                            ),
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                            // Edit & Delete Button
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                    final docs = snapshot.data?.docs ?? [];
+                    if (docs.isEmpty) {
+                      return const Center(
+                        child: Text('Ups, there is no data!', style: TextStyle(fontSize: 18)),
+                      );
+                    }
+
+                    return ListView.separated(
+                      itemCount: docs.length,
+                      separatorBuilder: (context, index) => const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final doc = docs[index];
+                        final docId = doc.id;
+                        final name = (doc['name'] ?? '-') as String;
+                        final address = (doc['address'] ?? '-') as String;
+                        final description = (doc['description'] ?? '-') as String;
+                        final datetime = (doc['datetime'] ?? '-') as String;
+
+                        // random pastel color for avatar
+                        final Color avatarColor = Colors.primaries[Random().nextInt(Colors.primaries.length)].shade400;
+
+                        return Card(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 3,
+                          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
                               children: [
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.edit,
-                                    color: Colors.blueAccent,
+                                CircleAvatar(
+                                  radius: 26,
+                                  backgroundColor: avatarColor,
+                                  child: Text(
+                                    name.isNotEmpty ? name[0].toUpperCase() : '-',
+                                    style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                                   ),
-                                  onPressed:
-                                      () => _editData(
-                                        docId,
-                                        name,
-                                        address,
-                                        description,
-                                        datetime,
-                                      ),
                                 ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                                      const SizedBox(height: 6),
+                                      Text(description, style: const TextStyle(fontSize: 14, color: Colors.black87), maxLines: 2, overflow: TextOverflow.ellipsis),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
+                                          const SizedBox(width: 6),
+                                          Expanded(child: Text(address, style: const TextStyle(fontSize: 13, color: Colors.grey), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(datetime, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+                                    ],
                                   ),
-                                  onPressed: () => _deleteData(docId),
+                                ),
+                                Column(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.edit, color: Color(0xFF667EEA)),
+                                      onPressed: () => _editData(docId, name, address, description, datetime),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete, color: Colors.redAccent),
+                                      onPressed: () => _deleteData(docId),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
+                          ),
+                        );
+                      },
                     );
                   },
-                )
-                : const Center(
-                  child: Text(
-                    "Ups, there is no data!",
-                    style: TextStyle(fontSize: 20),
-                  ),
-                );
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -51,64 +51,94 @@ class _AttendScreenState extends State<AttendScreen> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
 
+    // theme colors (match home screen)
+    const Color primary1 = Color(0xFF667EEA);
+    const Color primary2 = Color(0xFF764BA2);
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: const Color.fromARGB(255, 26, 0, 143),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        centerTitle: true,
-        title: const Text(
-          "Attendance Menu",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Card(
-          color: Colors.white,
-          margin: const EdgeInsets.fromLTRB(10, 10, 10, 30),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          elevation: 5,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: 50,
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10),
-                  ),
-                  color: Colors.blueAccent,
+      backgroundColor: const Color(0xFFF8F9FA),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // top header (full width gradient, with back button + title)
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [primary1, primary2],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                child: const Row(
-                  children: [
-                    SizedBox(width: 12),
-                    Icon(
-                      Icons.face_retouching_natural_outlined,
-                      color: Colors.white,
-                    ),
-                    SizedBox(width: 12),
-                    Text(
-                      "Please make a selfie photo!",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
                 ),
+                boxShadow: [
+                  BoxShadow(color: Color(0xFF667EEA), blurRadius: 12, spreadRadius: 0.5, offset: Offset(0, 6)),
+                ],
               ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  const SizedBox(width: 6),
+                  const Expanded(
+                    child: Text(
+                      'Attendance Menu',
+                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // body content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
+                child: Card(
+                  color: Colors.white,
+                  margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 6,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            topRight: Radius.circular(16),
+                          ),
+                          gradient: LinearGradient(
+                            colors: [primary1, primary2],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        child: Row(
+                          children: const [
+                            Icon(Icons.face_retouching_natural_outlined, color: Colors.white),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                "Please make a selfie photo!",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
               const Padding(
                 padding: EdgeInsets.fromLTRB(10, 20, 0, 20),
                 child: Text(
@@ -136,7 +166,7 @@ class _AttendScreenState extends State<AttendScreen> {
                   child: DottedBorder(
                     radius: const Radius.circular(10),
                     borderType: BorderType.RRect,
-                    color: Colors.blueAccent,
+                    color: primary1,
                     strokeWidth: 1,
                     dashPattern: const [5, 5],
                     child: SizedBox.expand(
@@ -147,9 +177,9 @@ class _AttendScreenState extends State<AttendScreen> {
                                   File(image!.path),
                                   fit: BoxFit.cover,
                                 )
-                                : const Icon(
+                                : Icon(
                                   Icons.camera_enhance_outlined,
-                                  color: Colors.blueAccent,
+                                  color: primary1,
                                 ),
                       ),
                     ),
@@ -176,11 +206,11 @@ class _AttendScreenState extends State<AttendScreen> {
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Colors.blueAccent),
+                      borderSide: BorderSide(color: primary1),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Colors.blueAccent),
+                      borderSide: BorderSide(color: primary1),
                     ),
                   ),
                 ),
@@ -197,8 +227,8 @@ class _AttendScreenState extends State<AttendScreen> {
                 ),
               ),
               isLoading
-                  ? const Center(
-                    child: CircularProgressIndicator(color: Colors.blueAccent),
+                  ? Center(
+                    child: CircularProgressIndicator(color: primary1),
                   )
                   : Padding(
                     padding: const EdgeInsets.all(10),
@@ -211,8 +241,8 @@ class _AttendScreenState extends State<AttendScreen> {
                           alignLabelWithHint: true,
                           disabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(
-                              color: Colors.blueAccent,
+                            borderSide: BorderSide(
+                              color: primary1,
                             ),
                           ),
                           hintText: strAlamat,
@@ -239,11 +269,11 @@ class _AttendScreenState extends State<AttendScreen> {
                       borderRadius: BorderRadius.circular(20),
                       color: Colors.white,
                     ),
-                    child: Material(
+                      child: Material(
                       borderRadius: BorderRadius.circular(20),
-                      color: Colors.blueAccent,
+                      color: primary1,
                       child: InkWell(
-                        splashColor: Colors.blue,
+                        splashColor: primary1.withOpacity(0.8),
                         borderRadius: BorderRadius.circular(20),
                         onTap: () {
                           if (image == null || controllerName.text.isEmpty) {
@@ -293,8 +323,12 @@ class _AttendScreenState extends State<AttendScreen> {
           ),
         ),
       ),
-    );
-  }
+     )
+    ]
+   )
+  )
+ );
+}
 
   //get realtime location
   Future<void> getGeoLocationPosition() async {
