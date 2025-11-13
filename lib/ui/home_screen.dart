@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:attendance_app/screen/absent/absent_screen.dart';
 import 'package:attendance_app/screen/attend/attend_screen.dart';
 import 'package:attendance_app/screen/attendance_history/attendance_history.dart';
+import 'package:attendance_app/screen/info/info_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -143,6 +144,29 @@ class HomeScreen extends StatelessWidget {
                                 subtitle: "View attendance records",
                                 color: const Color(0xFF4FACFE),
                                 lightColor: const Color(0xFFEFF7FF),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const InfoScreen(),
+                                  ),
+                                );
+                              },
+                              child: _buildMenuCard(
+                                icon: Icons.info_outline,
+                                title: "Information",
+                                subtitle: "App info and details",
+                                color: const Color(0xFF00C9A7),
+                                lightColor: const Color(0xFFE6FFFA),
                               ),
                             ),
                           ),
