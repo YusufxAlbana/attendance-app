@@ -221,28 +221,32 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                       itemBuilder: (context, index) {
                         final doc = docs[index];
                         final docId = doc.id;
-                        final name = (doc['name'] ?? '-') as String;
-                        final address = (doc['address'] ?? '-') as String;
-                        final fullDescription = (doc['description'] ?? '-') as String;
-                        final datetime = (doc['datetime'] ?? '-') as String;
+                        final data = doc.data() as Map<String, dynamic>;
+                        final name = (data['name'] ?? '-') as String;
+                        final address = (data['address'] ?? '-') as String;
+                        final storedCategory = (data['category'] ?? '') as String;
+                        final storedDescription = (data['description'] ?? '-') as String;
+                        final datetime = (data['datetime'] ?? '-') as String;
 
                         // Pastikan status expanded diinisialisasi
                         // FIX: Menggunakan Map.putIfAbsent untuk inisialisasi yang aman
                         _isExpanded.putIfAbsent(docId, () => false);
 
 
-                        // Pengecekan dan pemisahan Kategori dan Deskripsi
-                        String category = fullDescription;
+                        // Pengecekan dan pemisahan Kategori dan Deskripsi (mendukung data baru & lama)
+                        String category = storedCategory.trim();
                         String detail = '';
-                        bool isPermission = fullDescription.contains(' | Details: ');
+                        bool isPermission = category.isNotEmpty || storedDescription.contains(' | Details: ');
 
-                        if (isPermission) {
-                          final parts = fullDescription.split(' | Details: ');
+                        if (category.isNotEmpty) {
+                          detail = storedDescription.trim();
+                        } else if (storedDescription.contains(' | Details: ')) {
+                          final parts = storedDescription.split(' | Details: ');
                           category = parts[0].trim();
-                          detail = parts.length > 1 ? parts[1].trim() : ''; 
-                          if (detail.isEmpty || detail == 'No detailed description provided.') {
-                            detail = 'Tidak ada detail.';
-                          }
+                          detail = parts.length > 1 ? parts[1].trim() : '';
+                        }
+                        if (detail.isEmpty || detail == '-' || detail == 'No detailed description provided.') {
+                          detail = 'Tidak ada detail.';
                         }
                         
                         // Tentukan teks deskripsi yang akan ditampilkan (terpotong atau penuh)
@@ -321,7 +325,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                                         ),
                                       ] else 
                                       // Jika bukan izin (mungkin status Attend/Late), tampilkan seperti biasa
-                                      Text(fullDescription, style: const TextStyle(fontSize: 14, color: Colors.black87), maxLines: 2, overflow: TextOverflow.ellipsis),
+                                      Text(storedDescription, style: const TextStyle(fontSize: 14, color: Colors.black87), maxLines: 2, overflow: TextOverflow.ellipsis),
                                       
                                       const SizedBox(height: 6),
                                       // Lokasi
@@ -369,7 +373,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                                       // Tombol Edit
                                       IconButton(
                                         icon: const Icon(Icons.edit, color: Color(0xFF667EEA), size: 20),
-                                        onPressed: () => _editData(docId, name, address, fullDescription, datetime),
+                                        onPressed: () => _editData(docId, name, address, storedDescription, datetime),
                                         padding: EdgeInsets.zero,
                                         constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
                                       ),

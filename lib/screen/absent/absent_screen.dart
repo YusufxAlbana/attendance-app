@@ -35,9 +35,18 @@ class _AbsentScreenState extends State<AbsentScreen> {
   String strAlamat = '', strDate = '', strTime = '', strDateTime = '';
   final toController = TextEditingController();
 
+  DateTime? _tryParseDate(String s) {
+    try {
+      return DateFormat('dd/M/yyyy').parseStrict(s);
+    } catch (_) {
+      return null;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    fromController.text = DateFormat('dd/M/yyyy').format(DateTime.now());
   }
 
   // Menampilkan dialog loading
@@ -72,9 +81,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
     String from,
     String until,
   ) async {
-    // 1. Gabungkan kategori dan deskripsi detail untuk field 'description' di Firebase
-    // Format: "Category: Sick | Details: Demam tinggi"
-    final String fullDescription = "$kategori | Details: ${deskripsi.trim().isEmpty ? 'No detailed description provided.' : deskripsi.trim()}";
+    final String descriptionValue = deskripsi.trim();
 
     // Validasi input sebelum mengirim ke Firebase
     if (nama.isEmpty ||
@@ -100,6 +107,28 @@ class _AbsentScreenState extends State<AbsentScreen> {
       return;
     }
 
+    final fromDate = _tryParseDate(from);
+    final untilDate = _tryParseDate(until);
+    if (fromDate != null && untilDate != null && untilDate.isBefore(fromDate.add(const Duration(days: 1)))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.error_outline, color: Colors.white),
+              SizedBox(width: 10),
+              Text(
+                "Tanggal selesai minimal besok atau seterusnya!",
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
     // Menampilkan loader
     showLoaderDialog(context);
 
@@ -107,7 +136,8 @@ class _AbsentScreenState extends State<AbsentScreen> {
       await dataCollection.add({
         'address': '-',
         'name': nama,
-        'description': fullDescription, // Menggunakan gabungan kategori dan deskripsi
+        'category': kategori,
+        'description': descriptionValue,
         'datetime': '$from - $until',
         'created_at': FieldValue.serverTimestamp(),
       });
@@ -324,7 +354,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
               const Padding(
                 padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
                 child: Text(
-                  "Deskripsi", 
+                  "Deskripsi (Opsional)", 
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -382,43 +412,6 @@ class _AbsentScreenState extends State<AbsentScreen> {
                           Expanded(
                             child: TextField(
                               readOnly: true,
-                              onTap: () async {
-                                DateTime? pickedDate = await showDatePicker(
-                                  builder: (
-                                    BuildContext context,
-                                    Widget? child,
-                                  ) {
-                                    return Theme(
-                                      data: Theme.of(context).copyWith(
-                                        colorScheme: const ColorScheme.light(
-                                          onPrimary: Colors.white,
-                                          onSurface: Colors.black, 
-                                          primary: Colors.blueAccent,
-                                        ),
-                                        datePickerTheme:
-                                            const DatePickerThemeData(
-                                              headerBackgroundColor:
-                                                  Colors.blueAccent,
-                                              backgroundColor: Colors.white, 
-                                              headerForegroundColor:
-                                                  Colors.white,
-                                              surfaceTintColor: Colors.white,
-                                            ),
-                                      ),
-                                      child: child!,
-                                    );
-                                  },
-                                  context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime(1900),
-                                  lastDate: DateTime(9999),
-                                );
-                                if (pickedDate != null) {
-                                  fromController.text = DateFormat(
-                                    'dd/M/yyyy',
-                                  ).format(pickedDate);
-                                }
-                              },
                               style: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
@@ -426,7 +419,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                               controller: fromController,
                               decoration: const InputDecoration(
                                 contentPadding: EdgeInsets.all(8),
-                                hintText: "Masukkan tanggal mulai izin",
+                                hintText: "Tanggal mulai (hari ini)",
                                 hintStyle: TextStyle(
                                   color: Colors.grey,
                                   fontSize: 16,
@@ -453,6 +446,8 @@ class _AbsentScreenState extends State<AbsentScreen> {
                             child: TextField(
                               readOnly: true,
                               onTap: () async {
+                                final fromDate = _tryParseDate(fromController.text);
+                                final minUntilDate = (fromDate ?? DateTime.now()).add(const Duration(days: 1));
                                 DateTime? pickedDate = await showDatePicker(
                                   builder: (
                                     BuildContext context,
@@ -479,8 +474,8 @@ class _AbsentScreenState extends State<AbsentScreen> {
                                     );
                                   },
                                   context: context,
-                                  initialDate: DateTime.now(),
-                                  firstDate: DateTime(1900),
+                                  initialDate: minUntilDate,
+                                  firstDate: minUntilDate,
                                   lastDate: DateTime(9999),
                                 );
                                 if (pickedDate != null) {
@@ -532,7 +527,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                         borderRadius: BorderRadius.circular(20),
                         onTap: () {
                           if (controllerName.text.isEmpty ||
-                              dropValueCategories == "tolong, Pilih Kategori:" ||
+                              dropValueCategories == "Pilih kategori izin:" ||
                               fromController.text.isEmpty ||
                               toController.text.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -556,6 +551,31 @@ class _AbsentScreenState extends State<AbsentScreen> {
                               ),
                             );
                           } else {
+                            final fromDate = _tryParseDate(fromController.text);
+                            final untilDate = _tryParseDate(toController.text);
+                            final minUntil = fromDate?.add(const Duration(days: 1));
+                            if (minUntil != null && untilDate != null && untilDate.isBefore(minUntil)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.error_outline,
+                                        color: Colors.white,
+                                      ),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        "Tanggal selesai minimal besok atau seterusnya!",
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ],
+                                  ),
+                                  backgroundColor: Colors.redAccent,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              return;
+                            }
                             submitAbsen(
                               controllerName.text.toString(),
                               dropValueCategories.toString(), // Mengirim Kategori
