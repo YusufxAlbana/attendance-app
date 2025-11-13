@@ -11,20 +11,26 @@ class AbsentScreen extends StatefulWidget {
 }
 
 class _AbsentScreenState extends State<AbsentScreen> {
+  // Daftar kategori izin (untuk dropdown)
   var categoriesList = <String>[
-    "Please Choose:",
+    "Please Choose Category:",
+    "Sakit (Sick)",
+    "Izin Pribadi (Personal Leave)",
+    "Cuti Tahunan (Annual Leave)",
     "Others",
-    "Permission",
-    "Sick",
   ];
+  String dropValueCategories = "Please Choose Category:";
+  // -----------------------------------------------------------
 
   final controllerName = TextEditingController();
+  // Controller ini khusus untuk detail alasan/deskripsi manual
+  final controllerDescription = TextEditingController(); 
+
   double dLat = 0.0, dLong = 0.0;
   final CollectionReference dataCollection = FirebaseFirestore.instance
       .collection('attendance');
 
   int dateHours = 0, dateMinutes = 0;
-  String dropValueCategories = "Please Choose:";
   final fromController = TextEditingController();
   String strAlamat = '', strDate = '', strTime = '', strDateTime = '';
   final toController = TextEditingController();
@@ -34,7 +40,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
     super.initState();
   }
 
-  //show progress dialog
+  // Menampilkan dialog loading
   showLoaderDialog(BuildContext context) {
     AlertDialog alert = AlertDialog(
       content: Row(
@@ -58,16 +64,21 @@ class _AbsentScreenState extends State<AbsentScreen> {
     );
   }
 
-  //submit data absent to firebase
+  // Mengirim data perizinan ke Firebase
   Future<void> submitAbsen(
     String nama,
-    String keterangan,
+    String kategori, 
+    String deskripsi, // Deskripsi detail
     String from,
     String until,
   ) async {
+    // 1. Gabungkan kategori dan deskripsi detail untuk field 'description' di Firebase
+    // Format: "Category: Sick | Details: Demam tinggi"
+    final String fullDescription = "$kategori | Details: ${deskripsi.trim().isEmpty ? 'No detailed description provided.' : deskripsi.trim()}";
+
     // Validasi input sebelum mengirim ke Firebase
     if (nama.isEmpty ||
-        keterangan == "Please Choose:" ||
+        kategori == "Please Choose Category:" || // Cek apakah kategori sudah dipilih
         from.isEmpty ||
         until.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -77,7 +88,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
               Icon(Icons.error_outline, color: Colors.white),
               SizedBox(width: 10),
               Text(
-                "Pastikan semua data telah diisi!",
+                "Pastikan Nama, Kategori, dan tanggal sudah diisi!",
                 style: TextStyle(color: Colors.white),
               ),
             ],
@@ -96,9 +107,9 @@ class _AbsentScreenState extends State<AbsentScreen> {
       await dataCollection.add({
         'address': '-',
         'name': nama,
-        'description': keterangan,
+        'description': fullDescription, // Menggunakan gabungan kategori dan deskripsi
         'datetime': '$from - $until',
-        'created_at': FieldValue.serverTimestamp(), // Tambahkan timestamp
+        'created_at': FieldValue.serverTimestamp(),
       });
 
       // Tutup loader sebelum menampilkan pesan sukses
@@ -111,7 +122,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
               Icon(Icons.check_circle_outline, color: Colors.white),
               SizedBox(width: 10),
               Text(
-                "Yeay! Attendance Report Succeeded!",
+                "Yeay! Permission Report Succeeded!",
                 style: TextStyle(color: Colors.white),
               ),
             ],
@@ -213,7 +224,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                             SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                "Please Fill out the Form!",
+                                "Please Fill out the Permission Form!",
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -224,6 +235,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                           ],
                         ),
                       ),
+              // --- Bagian 1: Nama ---
               Padding(
                 padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
                 child: TextField(
@@ -253,10 +265,12 @@ class _AbsentScreenState extends State<AbsentScreen> {
                   ),
                 ),
               ),
+              
+              // --- Bagian 2: Kategori (Dropdown) ---
               const Padding(
                 padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
                 child: Text(
-                  "Description",
+                  "Kategori Izin (Permission Category)", 
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -265,7 +279,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
@@ -284,19 +298,18 @@ class _AbsentScreenState extends State<AbsentScreen> {
                         dropValueCategories = value.toString();
                       });
                     },
-                    items:
-                        categoriesList.map((value) {
-                          return DropdownMenuItem(
-                            value: value.toString(),
-                            child: Text(
-                              value.toString(),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.black,
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                    items: categoriesList.map((value) {
+                      return DropdownMenuItem(
+                        value: value.toString(),
+                        child: Text(
+                          value.toString(),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                          ),
+                        ),
+                      );
+                    }).toList(),
                     icon: const Icon(Icons.arrow_drop_down),
                     iconSize: 24,
                     elevation: 16,
@@ -306,6 +319,51 @@ class _AbsentScreenState extends State<AbsentScreen> {
                   ),
                 ),
               ),
+
+              // --- Bagian 3: Deskripsi Detail (Text Field Manual) ---
+              const Padding(
+                padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                child: Text(
+                  "Deskripsi Detail (Detailed Reason)", 
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+                child: TextField(
+                  textInputAction: TextInputAction.newline,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 5,
+                  controller: controllerDescription, 
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    labelText: "Tuliskan alasan perizinan Anda secara rinci.", 
+                    hintText: "Cth: Demam tinggi, harus ke dokter, atau menghadiri acara keluarga.",
+                    hintStyle: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                    labelStyle: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.black,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Colors.blueAccent),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Colors.blueAccent),
+                    ),
+                  ),
+                ),
+              ),
+              // -------------------------------------
+
               Padding(
                 padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
                 child: Row(
@@ -334,19 +392,14 @@ class _AbsentScreenState extends State<AbsentScreen> {
                                       data: Theme.of(context).copyWith(
                                         colorScheme: const ColorScheme.light(
                                           onPrimary: Colors.white,
-                                          onSurface: Colors.white,
+                                          onSurface: Colors.black, 
                                           primary: Colors.blueAccent,
                                         ),
                                         datePickerTheme:
                                             const DatePickerThemeData(
                                               headerBackgroundColor:
                                                   Colors.blueAccent,
-                                              backgroundColor: Color.fromARGB(
-                                                255,
-                                                0,
-                                                0,
-                                                0,
-                                              ),
+                                              backgroundColor: Colors.white, 
                                               headerForegroundColor:
                                                   Colors.white,
                                               surfaceTintColor: Colors.white,
@@ -403,31 +456,26 @@ class _AbsentScreenState extends State<AbsentScreen> {
                                 DateTime? pickedDate = await showDatePicker(
                                   builder: (
                                     BuildContext context,
-                                    Widget? widget,
+                                    Widget? child,
                                   ) {
                                     return Theme(
                                       data: Theme.of(context).copyWith(
                                         colorScheme: const ColorScheme.light(
                                           onPrimary: Colors.white,
-                                          onSurface: Colors.white,
+                                          onSurface: Colors.black,
                                           primary: Colors.blueAccent,
                                         ),
                                         datePickerTheme:
                                             const DatePickerThemeData(
                                               headerBackgroundColor:
                                                   Colors.blueAccent,
-                                              backgroundColor: Color.fromARGB(
-                                                255,
-                                                0,
-                                                0,
-                                                0,
-                                              ),
+                                              backgroundColor: Colors.white,
                                               headerForegroundColor:
                                                   Colors.white,
                                               surfaceTintColor: Colors.white,
                                             ),
                                       ),
-                                      child: widget!,
+                                      child: child!,
                                     );
                                   },
                                   context: context,
@@ -453,6 +501,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                                   color: Colors.grey,
                                   fontSize: 16,
                                 ),
+                                
                               ),
                             ),
                           ),
@@ -483,7 +532,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                         borderRadius: BorderRadius.circular(20),
                         onTap: () {
                           if (controllerName.text.isEmpty ||
-                              dropValueCategories == "Please Choose:" ||
+                              dropValueCategories == "Please Choose Category:" ||
                               fromController.text.isEmpty ||
                               toController.text.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -496,7 +545,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                                     ),
                                     SizedBox(width: 10),
                                     Text(
-                                      "Ups, please fill the form!",
+                                      "Ups, pastikan Nama, Kategori, dan tanggal sudah diisi!",
                                       style: TextStyle(color: Colors.white),
                                     ),
                                   ],
@@ -509,7 +558,8 @@ class _AbsentScreenState extends State<AbsentScreen> {
                           } else {
                             submitAbsen(
                               controllerName.text.toString(),
-                              dropValueCategories.toString(),
+                              dropValueCategories.toString(), // Mengirim Kategori
+                              controllerDescription.text.toString(), // Mengirim Deskripsi Detail
                               fromController.text,
                               toController.text,
                             );
@@ -533,10 +583,6 @@ class _AbsentScreenState extends State<AbsentScreen> {
           ),
         ),
       ),
-    )
-   ]
-  ) 
- ) 
-);
+    )])));
   }
 }

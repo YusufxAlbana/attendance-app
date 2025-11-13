@@ -14,7 +14,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
   final CollectionReference dataCollection = FirebaseFirestore.instance
       .collection('attendance');
 
-  // function Edit Data
+  // function Edit Data - Diperbarui untuk menangani deskripsi sebagai teks bebas
   void _editData(
     String docId,
     String currentName,
@@ -28,6 +28,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     TextEditingController addressController = TextEditingController(
       text: currentAddress,
     );
+    // Menggunakan TextField untuk Deskripsi/Izin
     TextEditingController descriptionController = TextEditingController(
       text: currentDescription,
     );
@@ -53,7 +54,8 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                 ),
                 TextField(
                   controller: descriptionController,
-                  decoration: const InputDecoration(labelText: "Description"),
+                  decoration: const InputDecoration(labelText: "Description / Permission Reason"), // Label diperbarui
+                  maxLines: 3, // Multi-line input
                 ),
                 TextField(
                   controller: datetimeController,
@@ -67,7 +69,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                   await dataCollection.doc(docId).update({
                     'name': nameController.text,
                     'address': addressController.text,
-                    'description': descriptionController.text,
+                    'description': descriptionController.text, // Menggunakan teks bebas dari TextField
                     'datetime': datetimeController.text,
                   });
                   Navigator.pop(context);
@@ -191,9 +193,23 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                         final docId = doc.id;
                         final name = (doc['name'] ?? '-') as String;
                         final address = (doc['address'] ?? '-') as String;
-                        final description = (doc['description'] ?? '-') as String;
+                        final fullDescription = (doc['description'] ?? '-') as String;
                         final datetime = (doc['datetime'] ?? '-') as String;
 
+                        // Pengecekan dan pemisahan Kategori dan Deskripsi
+                        String category = fullDescription;
+                        String detail = 'No details.';
+
+                        // Format yang diharapkan dari absent_screen adalah "Kategori | Details: Deskripsi"
+                        if (fullDescription.contains(' | Details: ')) {
+                          final parts = fullDescription.split(' | Details: ');
+                          category = parts[0].trim();
+                          // Pastikan ada bagian detail, jika tidak, gunakan string kosong.
+                          detail = parts.length > 1 ? parts[1].trim() : 'No details.'; 
+                        } else if (fullDescription == 'Attend' || fullDescription == 'Late' || fullDescription == 'Leave') {
+                           // Biarkan sebagai status biasa jika bukan izin
+                        }
+                        
                         // random pastel color for avatar
                         final Color avatarColor = Colors.primaries[Random().nextInt(Colors.primaries.length)].shade400;
 
@@ -220,7 +236,51 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                                     children: [
                                       Text(name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                                       const SizedBox(height: 6),
-                                      Text(description, style: const TextStyle(fontSize: 14, color: Colors.black87), maxLines: 2, overflow: TextOverflow.ellipsis),
+
+                                      // --- Menampilkan Kategori Izin (jika ada) ---
+                                      if (fullDescription.contains(' | Details: ')) 
+                                        RichText(
+                                          text: TextSpan(
+                                            style: DefaultTextStyle.of(context).style,
+                                            children: <TextSpan>[
+                                              const TextSpan(
+                                                text: 'Kategori: ',
+                                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 14),
+                                              ),
+                                              TextSpan(
+                                                text: category,
+                                                style: const TextStyle(color: Colors.black87, fontSize: 14),
+                                              ),
+                                            ],
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      
+                                      // --- Menampilkan Deskripsi Detail (jika ada) ---
+                                      if (fullDescription.contains(' | Details: ')) ...[
+                                        const SizedBox(height: 4),
+                                        RichText(
+                                          text: TextSpan(
+                                            style: DefaultTextStyle.of(context).style,
+                                            children: <TextSpan>[
+                                              const TextSpan(
+                                                text: 'Deskripsi: ',
+                                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 14),
+                                              ),
+                                              TextSpan(
+                                                text: detail,
+                                                style: const TextStyle(color: Colors.black87, fontSize: 14),
+                                              ),
+                                            ],
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ] else 
+                                      // Jika bukan izin (mungkin status Attend/Late), tampilkan seperti biasa
+                                      Text(fullDescription, style: const TextStyle(fontSize: 14, color: Colors.black87), maxLines: 2, overflow: TextOverflow.ellipsis),
+                                      
                                       const SizedBox(height: 6),
                                       Row(
                                         children: [
@@ -238,7 +298,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                                   children: [
                                     IconButton(
                                       icon: const Icon(Icons.edit, color: Color(0xFF667EEA)),
-                                      onPressed: () => _editData(docId, name, address, description, datetime),
+                                      onPressed: () => _editData(docId, name, address, fullDescription, datetime),
                                     ),
                                     IconButton(
                                       icon: const Icon(Icons.delete, color: Colors.redAccent),
