@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:attendance_app/utils/notification_overlay.dart'; 
 
 class AttendanceHistoryScreen extends StatefulWidget {
   const AttendanceHistoryScreen({super.key});
@@ -14,7 +15,18 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
   final CollectionReference dataCollection = FirebaseFirestore.instance
       .collection('attendance');
 
-  // function Edit Data - Diperbarui untuk menangani deskripsi sebagai teks bebas
+  // Map untuk menyimpan status "expanded" (terbuka penuh) per item
+  final Map<String, bool> _isExpanded = {};
+  
+  // Fungsi untuk memotong teks
+  String _truncateText(String text, {int maxLength = 30}) {
+    if (text.length <= maxLength) {
+      return text;
+    }
+    return '${text.substring(0, maxLength)}...';
+  }
+
+  // function Edit Data
   void _editData(
     String docId,
     String currentName,
@@ -28,7 +40,6 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     TextEditingController addressController = TextEditingController(
       text: currentAddress,
     );
-    // Menggunakan TextField untuk Deskripsi/Izin
     TextEditingController descriptionController = TextEditingController(
       text: currentDescription,
     );
@@ -54,8 +65,8 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                 ),
                 TextField(
                   controller: descriptionController,
-                  decoration: const InputDecoration(labelText: "Description / Permission Reason"), // Label diperbarui
-                  maxLines: 3, // Multi-line input
+                  decoration: const InputDecoration(labelText: "Description / Permission Reason"),
+                  maxLines: 3, 
                 ),
                 TextField(
                   controller: datetimeController,
@@ -69,11 +80,18 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                   await dataCollection.doc(docId).update({
                     'name': nameController.text,
                     'address': addressController.text,
-                    'description': descriptionController.text, // Menggunakan teks bebas dari TextField
+                    'description': descriptionController.text,
                     'datetime': datetimeController.text,
+                  }).then((_) {
+                    Navigator.pop(context);
+                    // Panggil notifikasi Sukses setelah Edit
+                    showSuccessNotification(context, 'Data berhasil diubah! ✨');
+                    setState(() {}); 
+                  }).catchError((e) {
+                    Navigator.pop(context);
+                    // Panggil notifikasi Gagal jika ada Error
+                    showErrorNotification(context, 'Gagal mengubah data. Coba lagi.');
                   });
-                  Navigator.pop(context);
-                  setState(() {}); // Update screen after edit
                 },
                 child: const Text(
                   "Save",
@@ -103,9 +121,16 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
             actions: [
               TextButton(
                 onPressed: () async {
-                  await dataCollection.doc(docId).delete();
-                  Navigator.pop(context);
-                  setState(() {}); // Perbarui tampilan setelah delete
+                  await dataCollection.doc(docId).delete().then((_) {
+                    Navigator.pop(context);
+                    // Panggil notifikasi Sukses setelah Delete
+                    showSuccessNotification(context, 'Data berhasil dihapus! 🗑️'); 
+                    setState(() {});
+                  }).catchError((e) {
+                    Navigator.pop(context);
+                    // Panggil notifikasi Gagal jika ada Error
+                    showErrorNotification(context, 'Gagal menghapus data. Coba lagi.');
+                  });
                 },
                 child: const Text("Yes", style: TextStyle(color: Colors.red)),
               ),
@@ -123,6 +148,11 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
     // shared theme colors
     const Color primary1 = Color(0xFF667EEA);
     const Color primary2 = Color(0xFF764BA2);
+    final bool isMobile = MediaQuery.of(context).size.width < 600;
+    
+    // Tentukan panjang maksimal pemotongan berdasarkan lebar layar
+    final int maxLength = isMobile ? 30 : 60;
+
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -196,20 +226,28 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                         final fullDescription = (doc['description'] ?? '-') as String;
                         final datetime = (doc['datetime'] ?? '-') as String;
 
+                        // Pastikan status expanded diinisialisasi
+                        // FIX: Menggunakan Map.putIfAbsent untuk inisialisasi yang aman
+                        _isExpanded.putIfAbsent(docId, () => false);
+
+
                         // Pengecekan dan pemisahan Kategori dan Deskripsi
                         String category = fullDescription;
-                        String detail = 'No details.';
+                        String detail = '';
+                        bool isPermission = fullDescription.contains(' | Details: ');
 
-                        // Format yang diharapkan dari absent_screen adalah "Kategori | Details: Deskripsi"
-                        if (fullDescription.contains(' | Details: ')) {
+                        if (isPermission) {
                           final parts = fullDescription.split(' | Details: ');
                           category = parts[0].trim();
-                          // Pastikan ada bagian detail, jika tidak, gunakan string kosong.
-                          detail = parts.length > 1 ? parts[1].trim() : 'No details.'; 
-                        } else if (fullDescription == 'Attend' || fullDescription == 'Late' || fullDescription == 'Leave') {
-                           // Biarkan sebagai status biasa jika bukan izin
+                          detail = parts.length > 1 ? parts[1].trim() : ''; 
+                          if (detail.isEmpty || detail == 'No detailed description provided.') {
+                            detail = 'Tidak ada detail.';
+                          }
                         }
                         
+                        // Tentukan teks deskripsi yang akan ditampilkan (terpotong atau penuh)
+                        final displayDetailText = _isExpanded[docId] == true ? detail : _truncateText(detail, maxLength: maxLength);
+
                         // random pastel color for avatar
                         final Color avatarColor = Colors.primaries[Random().nextInt(Colors.primaries.length)].shade400;
 
@@ -220,7 +258,9 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(12),
                             child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                // Kolom Kiri: Avatar
                                 CircleAvatar(
                                   radius: 26,
                                   backgroundColor: avatarColor,
@@ -230,6 +270,8 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 14),
+
+                                // Kolom Tengah: Info Utama (Nama, Kategori, Deskripsi, Lokasi, Waktu)
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -238,7 +280,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                                       const SizedBox(height: 6),
 
                                       // --- Menampilkan Kategori Izin (jika ada) ---
-                                      if (fullDescription.contains(' | Details: ')) 
+                                      if (isPermission) 
                                         RichText(
                                           text: TextSpan(
                                             style: DefaultTextStyle.of(context).style,
@@ -258,7 +300,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                                         ),
                                       
                                       // --- Menampilkan Deskripsi Detail (jika ada) ---
-                                      if (fullDescription.contains(' | Details: ')) ...[
+                                      if (isPermission) ...[
                                         const SizedBox(height: 4),
                                         RichText(
                                           text: TextSpan(
@@ -269,12 +311,12 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                                                 style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 14),
                                               ),
                                               TextSpan(
-                                                text: detail,
+                                                text: displayDetailText,
                                                 style: const TextStyle(color: Colors.black87, fontSize: 14),
                                               ),
                                             ],
                                           ),
-                                          maxLines: 2,
+                                          maxLines: _isExpanded[docId] == true ? 100 : 1, // Batasi 1 baris jika tidak expand
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ] else 
@@ -282,6 +324,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                                       Text(fullDescription, style: const TextStyle(fontSize: 14, color: Colors.black87), maxLines: 2, overflow: TextOverflow.ellipsis),
                                       
                                       const SizedBox(height: 6),
+                                      // Lokasi
                                       Row(
                                         children: [
                                           const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
@@ -290,21 +333,56 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                                         ],
                                       ),
                                       const SizedBox(height: 6),
+                                      // Waktu
                                       Text(datetime, style: const TextStyle(fontSize: 12, color: Colors.black54)),
                                     ],
                                   ),
                                 ),
-                                Column(
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.edit, color: Color(0xFF667EEA)),
-                                      onPressed: () => _editData(docId, name, address, fullDescription, datetime),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete, color: Colors.redAccent),
-                                      onPressed: () => _deleteData(docId),
-                                    ),
-                                  ],
+
+                                // Kolom Kanan: Tombol Aksi (Mata, Edit, Delete)
+                                SizedBox(
+                                  width: 40, 
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      // Tombol View (Mata) - Hanya muncul jika ada deskripsi detail panjang
+                                      if (isPermission && detail.length > maxLength)
+                                        IconButton(
+                                          icon: Icon(
+                                            _isExpanded[docId] == true ? Icons.visibility_off : Icons.visibility, 
+                                            color: primary1,
+                                            size: 20,
+                                          ),
+                                          onPressed: () {
+                                            setState(() {
+                                              _isExpanded[docId] = !(_isExpanded[docId] ?? false);
+                                            });
+                                          },
+                                          padding: EdgeInsets.zero,
+                                          constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+                                        ),
+                                      
+                                      // Spacer di antara tombol jika tombol Mata muncul
+                                      if (isPermission && detail.length > maxLength)
+                                        const SizedBox(height: 4),
+
+                                      // Tombol Edit
+                                      IconButton(
+                                        icon: const Icon(Icons.edit, color: Color(0xFF667EEA), size: 20),
+                                        onPressed: () => _editData(docId, name, address, fullDescription, datetime),
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+                                      ),
+                                      
+                                      // Tombol Delete
+                                      IconButton(
+                                        icon: const Icon(Icons.delete, color: Colors.redAccent, size: 20),
+                                        onPressed: () => _deleteData(docId),
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),

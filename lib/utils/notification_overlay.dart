@@ -10,12 +10,17 @@ import 'package:flutter/material.dart';
 Future<void> showAnimatedNotification(
   BuildContext context,
   String message, {
-  Duration duration = const Duration(seconds: 3),
+  Duration duration = const Duration(seconds: 2), // Durasi diubah menjadi 2 detik
   Color backgroundColor = const Color(0xFF333333),
   Color textColor = Colors.white,
   IconData? icon,
 }) async {
+  // Cek jika Overlay belum siap (misalnya, di awal build)
   final overlay = Overlay.of(context);
+  if (overlay == null) {
+      debugPrint("Error: Could not find Overlay in the current context.");
+      return;
+  }
 
   late OverlayEntry entry;
   entry = OverlayEntry(
@@ -34,6 +39,27 @@ Future<void> showAnimatedNotification(
 
   overlay.insert(entry);
 }
+
+/// Utility function for showing a standard Success notification.
+Future<void> showSuccessNotification(BuildContext context, String message) async {
+  showAnimatedNotification(
+    context,
+    message,
+    backgroundColor: Colors.green.shade600,
+    icon: Icons.check_circle_outline,
+  );
+}
+
+/// Utility function for showing a standard Error/Delete notification.
+Future<void> showErrorNotification(BuildContext context, String message) async {
+  showAnimatedNotification(
+    context,
+    message,
+    backgroundColor: Colors.red.shade600,
+    icon: Icons.error_outline,
+  );
+}
+
 
 class _NotificationToast extends StatefulWidget {
   final String message;
@@ -61,28 +87,24 @@ class _NotificationToastState extends State<_NotificationToast>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 400), // Durasi halus 
+    duration: const Duration(milliseconds: 400), 
   );
 
   // Animasi Geser (Slide): Mulai 30% di bawah (0, 0.3) ke posisi target (Offset.zero)
-  // Curve: easeOutCubic untuk kemunculan yang mulus dan cepat
   late final Animation<Offset> _offset = Tween<Offset>(
-    begin: const Offset(0, 0.3), 
+    begin: const Offset(0, 0.3), // Mulai dari 30% di bawah area notif
     end: Offset.zero,
   ).animate(CurvedAnimation(
     parent: _controller,
     curve: Curves.easeOutCubic, 
-    reverseCurve: Curves.easeInQuad, // Agak cepat saat turun
+    reverseCurve: Curves.easeInQuad, 
   ));
 
-  // Animasi Pudar (Fade): Selalu terlihat (1.0) saat muncul, dan memudar (ke 0.0) saat menghilang
-  late final Animation<double> _fade = Tween<double>(
-    begin: 1.0, // Mulai dari terlihat penuh
-    end: 0.0,
-  ).animate(CurvedAnimation(
+  // Animasi Pudar (Fade)
+  late final Animation<double> _fade = CurvedAnimation(
     parent: _controller,
-    curve: const Interval(0.0, 1.0, curve: Curves.linear), // Selalu 1.0 saat forward, lalu memudar saat reverse
-  ));
+    curve: const Interval(0.0, 1.0, curve: Curves.linear), 
+  );
 
   @override
   void initState() {
@@ -96,11 +118,13 @@ class _NotificationToastState extends State<_NotificationToast>
       // Phase 1: Muncul (geser ke atas)
       await _controller.forward();
       
-      // Phase 2: Tunggu
+      // Phase 2: Tunggu selama 2 detik (widget.duration)
       await Future.delayed(widget.duration);
       
       // Phase 3: Hilang (geser ke bawah dan memudar)
-      await _controller.reverse();
+      if(mounted && _controller.isCompleted) { 
+        await _controller.reverse();
+      }
     } on TickerCanceled {
       // Ditangani jika widget dibuang
     } catch (_) {
@@ -120,9 +144,9 @@ class _NotificationToastState extends State<_NotificationToast>
 
   @override
   Widget build(BuildContext context) {
-    // Memposisikan notifikasi di bagian atas layar, di bawah status bar.
+    // Memposisikan notifikasi di bagian bawah layar (bottom), di atas padding navigasi (jika ada).
     return Positioned(
-      top: MediaQuery.of(context).padding.top + 16,
+      bottom: MediaQuery.of(context).padding.bottom + 16, // Posisi di bawah
       left: 16,
       right: 16,
       // Menggunakan SlideTransition untuk gerakan naik/turun
@@ -135,7 +159,6 @@ class _NotificationToastState extends State<_NotificationToast>
             color: Colors.transparent,
             child: SafeArea(
               top: false,
-              bottom: false,
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 500), 
@@ -175,8 +198,11 @@ class _NotificationToastState extends State<_NotificationToast>
                         // Tombol tutup (opsional)
                         GestureDetector(
                           onTap: () async {
-                            await _controller.reverse();
-                            widget.onDismissed();
+                            // Tutup segera
+                            if(mounted) {
+                              await _controller.reverse();
+                              widget.onDismissed();
+                            }
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(4.0),
