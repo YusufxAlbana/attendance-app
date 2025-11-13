@@ -95,7 +95,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
                 },
                 child: const Text(
                   "Save",
-                  style: TextStyle(color: Colors.blueAccent),
+                  style: TextStyle(color: Color(0xFF2563EB)),
                 ),
               ),
               TextButton(
@@ -145,9 +145,9 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // shared theme colors
-    const Color primary1 = Color(0xFF667EEA);
-    const Color primary2 = Color(0xFF764BA2);
+    // shared theme colors (professional palette)
+    const Color primary1 = Color(0xFF2563EB);
+    const Color primary2 = Color(0xFF0EA5E9);
     final bool isMobile = MediaQuery.of(context).size.width < 600;
     
     // Tentukan panjang maksimal pemotongan berdasarkan lebar layar
@@ -372,7 +372,7 @@ class _AttendanceHistoryScreenState extends State<AttendanceHistoryScreen> {
 
                                       // Tombol Edit
                                       IconButton(
-                                        icon: const Icon(Icons.edit, color: Color(0xFF667EEA), size: 20),
+                                        icon: const Icon(Icons.edit, color: Color(0xFF2563EB), size: 20),
                                         onPressed: () => _editData(docId, name, address, storedDescription, datetime),
                                         padding: EdgeInsets.zero,
                                         constraints: const BoxConstraints(minWidth: 30, minHeight: 30),

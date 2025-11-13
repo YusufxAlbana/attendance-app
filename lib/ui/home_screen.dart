@@ -12,7 +12,6 @@ class HomeScreen extends StatelessWidget {
     // Responsive sizes
     final double screenW = MediaQuery.of(context).size.width;
     final double headerFontSize = screenW < 360 ? 20 : (screenW < 420 ? 22 : 24);
-    final double subtitleFontSize = screenW < 360 ? 12 : 13;
     final double headerVerticalPadding = screenW < 360 ? 14 : 18;
 
     return Scaffold(
@@ -25,7 +24,7 @@ class HomeScreen extends StatelessWidget {
               width: double.infinity,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                  colors: [Color(0xFF2563EB), Color(0xFF0EA5E9)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -35,7 +34,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF667EEA).withOpacity(0.3),
+                    color: const Color(0xFF2563EB).withOpacity(0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -51,15 +50,6 @@ class HomeScreen extends StatelessWidget {
                       fontSize: headerFontSize,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "Welcome to Admin Panel",
-                    style: TextStyle(
-                      fontSize: subtitleFontSize,
-                      color: const Color(0xFFE0E0FF),
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
@@ -93,8 +83,8 @@ class HomeScreen extends StatelessWidget {
                                 imageAsset: 'assets/images/ic_absen.png',
                                 title: "Attendance Record",
                                 subtitle: "Record your attendance",
-                                color: const Color(0xFF667EEA),
-                                lightColor: const Color(0xFFEFF0FF),
+                                color: const Color(0xFF2563EB),
+                                lightColor: const Color(0xFFEAF4FF),
                               ),
                             ),
                           ),
@@ -117,8 +107,8 @@ class HomeScreen extends StatelessWidget {
                                 imageAsset: 'assets/images/ic_leave.png',
                                 title: "Permission",
                                 subtitle: "Request leave or permission",
-                                color: const Color(0xFFF093FB),
-                                lightColor: const Color(0xFFFFF5FE),
+                                color: const Color(0xFF0EA5E9),
+                                lightColor: const Color(0xFFE6F7FF),
                               ),
                             ),
                           ),
@@ -142,8 +132,8 @@ class HomeScreen extends StatelessWidget {
                                 imageAsset: 'assets/images/ic_history.png',
                                 title: "Attendance History",
                                 subtitle: "View attendance records",
-                                color: const Color(0xFF4FACFE),
-                                lightColor: const Color(0xFFEFF7FF),
+                                color: const Color(0xFF22D3EE),
+                                lightColor: const Color(0xFFE6FFFA),
                               ),
                             ),
                           ),
@@ -165,8 +155,8 @@ class HomeScreen extends StatelessWidget {
                                 icon: Icons.info_outline,
                                 title: "Information",
                                 subtitle: "App info and details",
-                                color: const Color(0xFF00C9A7),
-                                lightColor: const Color(0xFFE6FFFA),
+                                color: const Color(0xFF0EA5E9),
+                                lightColor: const Color(0xFFE6F7FF),
                               ),
                             ),
                           ),

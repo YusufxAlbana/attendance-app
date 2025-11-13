@@ -51,9 +51,9 @@ class _AttendScreenState extends State<AttendScreen> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
 
-    // theme colors (match home screen)
-    const Color primary1 = Color(0xFF667EEA);
-    const Color primary2 = Color(0xFF764BA2);
+    // theme colors (professional palette)
+    const Color primary1 = Color(0xFF2563EB);
+    const Color primary2 = Color(0xFF0EA5E9);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -74,7 +74,7 @@ class _AttendScreenState extends State<AttendScreen> {
                   bottomRight: Radius.circular(20),
                 ),
                 boxShadow: [
-                  BoxShadow(color: Color(0xFF667EEA), blurRadius: 12, spreadRadius: 0.5, offset: Offset(0, 6)),
+                  BoxShadow(color: Color(0xFF2563EB), blurRadius: 12, spreadRadius: 0.5, offset: Offset(0, 6)),
                 ],
               ),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),

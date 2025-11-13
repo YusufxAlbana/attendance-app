@@ -5,10 +5,10 @@ class InfoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Color primary1 = Color(0xFF667EEA);
-    const Color primary2 = Color(0xFF764BA2);
+    const Color primary1 = Color(0xFF2563EB);
+    const Color primary2 = Color(0xFF0EA5E9);
     return Scaffold(
-      backgroundColor: const Color.fromARGB(106, 248, 249, 250),
+      backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
         child: Column(
           children: [
