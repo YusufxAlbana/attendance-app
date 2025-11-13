@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:attendance_app/absent/absent_screen.dart';
-import 'package:attendance_app/attend/attend_screen.dart';
-import 'package:attendance_app/attendance_history/attendance_history.dart';
+import 'package:attendance_app/screen/absent/absent_screen.dart';
+import 'package:attendance_app/screen/attend/attend_screen.dart';
+import 'package:attendance_app/screen/attendance_history/attendance_history.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
