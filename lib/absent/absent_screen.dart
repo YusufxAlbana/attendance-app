@@ -13,13 +13,13 @@ class AbsentScreen extends StatefulWidget {
 class _AbsentScreenState extends State<AbsentScreen> {
   // Daftar kategori izin (untuk dropdown)
   var categoriesList = <String>[
-    "Please Choose Category:",
-    "Sakit (Sick)",
-    "Izin Pribadi (Personal Leave)",
-    "Cuti Tahunan (Annual Leave)",
+    "Pilih kategori izin:",
+    "Sakit",
+    "Izin Pribadi",
+    "Cuti Tahunan",
     "Others",
   ];
-  String dropValueCategories = "Please Choose Category:";
+  String dropValueCategories = "Pilih kategori izin:";
   // -----------------------------------------------------------
 
   final controllerName = TextEditingController();
@@ -50,7 +50,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
           ),
           Container(
             margin: const EdgeInsets.only(left: 20),
-            child: const Text("Please Wait..."),
+            child: const Text("Loading..."),
           ),
         ],
       ),
@@ -78,7 +78,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
 
     // Validasi input sebelum mengirim ke Firebase
     if (nama.isEmpty ||
-        kategori == "Please Choose Category:" || // Cek apakah kategori sudah dipilih
+        kategori == "Pilih kategori izin:" || // Cek apakah kategori sudah dipilih
         from.isEmpty ||
         until.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -122,7 +122,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
               Icon(Icons.check_circle_outline, color: Colors.white),
               SizedBox(width: 10),
               Text(
-                "Yeay! Permission Report Succeeded!",
+                "Izin berhasil dikirim!",
                 style: TextStyle(color: Colors.white),
               ),
             ],
@@ -149,7 +149,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  "Ups, terjadi kesalahan: $e",
+                  "terjadi kesalahan: $e",
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
@@ -224,7 +224,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                             SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                "Please Fill out the Permission Form!",
+                                "Isi Form Izin!",
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -244,8 +244,8 @@ class _AbsentScreenState extends State<AbsentScreen> {
                   controller: controllerName,
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-                    labelText: "Your Name",
-                    hintText: "Please enter your name",
+                    labelText: "Nama",
+                    hintText: "Masukkan nama",
                     hintStyle: const TextStyle(
                       fontSize: 14,
                       color: Colors.grey,
@@ -270,7 +270,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
               const Padding(
                 padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
                 child: Text(
-                  "Kategori Izin (Permission Category)", 
+                  "Kategori Izin", 
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -324,7 +324,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
               const Padding(
                 padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
                 child: Text(
-                  "Deskripsi Detail (Detailed Reason)", 
+                  "Deskripsi", 
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -341,7 +341,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                   controller: controllerDescription, 
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                    labelText: "Tuliskan alasan perizinan Anda secara rinci.", 
+                    labelText: "Tuliskan alasan perizinan.", 
                     hintText: "Cth: Demam tinggi, harus ke dokter, atau menghadiri acara keluarga.",
                     hintStyle: const TextStyle(
                       fontSize: 14,
@@ -372,7 +372,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                       child: Row(
                         children: [
                           const Text(
-                            "From: ",
+                            "dari: ",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -426,7 +426,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                               controller: fromController,
                               decoration: const InputDecoration(
                                 contentPadding: EdgeInsets.all(8),
-                                hintText: "Starting From",
+                                hintText: "Masukkan tanggal mulai izin",
                                 hintStyle: TextStyle(
                                   color: Colors.grey,
                                   fontSize: 16,
@@ -442,7 +442,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                       child: Row(
                         children: [
                           const Text(
-                            "Until: ",
+                            "sampai: ",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -496,7 +496,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                               controller: toController,
                               decoration: const InputDecoration(
                                 contentPadding: EdgeInsets.all(8),
-                                hintText: "Until",
+                                hintText: "Masukkan tanggal selesai izin",
                                 hintStyle: TextStyle(
                                   color: Colors.grey,
                                   fontSize: 16,
@@ -532,7 +532,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                         borderRadius: BorderRadius.circular(20),
                         onTap: () {
                           if (controllerName.text.isEmpty ||
-                              dropValueCategories == "Please Choose Category:" ||
+                              dropValueCategories == "tolong, Pilih Kategori:" ||
                               fromController.text.isEmpty ||
                               toController.text.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -567,7 +567,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                         },
                         child: const Center(
                           child: Text(
-                            "Make a Request",
+                            "buat perizinan!",
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,

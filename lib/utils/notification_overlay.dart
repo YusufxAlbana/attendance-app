@@ -17,10 +17,6 @@ Future<void> showAnimatedNotification(
 }) async {
   // Cek jika Overlay belum siap (misalnya, di awal build)
   final overlay = Overlay.of(context);
-  if (overlay == null) {
-      debugPrint("Error: Could not find Overlay in the current context.");
-      return;
-  }
 
   late OverlayEntry entry;
   entry = OverlayEntry(
