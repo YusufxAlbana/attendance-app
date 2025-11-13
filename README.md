@@ -25,20 +25,6 @@ Firebase: Digunakan untuk autentikasi pengguna, penyimpanan data, serta pengelol
 
 Aplikasi ini ditujukan untuk perusahaan dan karyawan, khususnya dalam meningkatkan efisiensi serta transparansi proses absensi di tempat kerja.
 
-🏗️ Struktur Folder Utama
-attendance_app/
-│
-├── lib/
-│   ├── main.dart               # File utama aplikasi
-│   ├── screen/                 # Folder untuk halaman aplikasi
-│   ├── utils/                  # Komponen tampilan
-│   ├── ui/                     # Struktur data dan model
-│
-├── pubspec.yaml                # Daftar dependency Flutter
-├── android/                    # Konfigurasi Android
-├── ios/                        # Konfigurasi iOS
-└── README.md                   # Dokumentasi proyek
-
 🚀 Cara Menjalankan Proyek
 
 Ikuti langkah-langkah berikut untuk menjalankan aplikasi:
