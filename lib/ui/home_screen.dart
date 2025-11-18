@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:attendance_app/screen/absent/absent_screen.dart';
 import 'package:attendance_app/screen/attend/attend_screen.dart';
 import 'package:attendance_app/screen/attendance_history/attendance_history.dart';
 import 'package:attendance_app/screen/info/info_screen.dart';
+import 'package:attendance_app/screen/profile/profile_screen.dart';
+import 'package:attendance_app/providers/firebase_auth_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -41,16 +44,45 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: headerVerticalPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    "Attendance System",
-                    style: TextStyle(
-                      fontSize: headerFontSize,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Attendance System",
+                          style: TextStyle(
+                            fontSize: headerFontSize,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Consumer<FirebaseAuthProvider>(
+                          builder: (context, auth, _) {
+                            return Text(
+                              auth.userData?['name'] ?? auth.user?.email ?? '',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.white70,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.person, color: Colors.white),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProfileScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

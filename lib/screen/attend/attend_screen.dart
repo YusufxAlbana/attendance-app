@@ -329,7 +329,7 @@ class _AttendScreenState extends State<AttendScreen> {
   )
  );
 }
-
+n
   //get realtime location
   Future<void> getGeoLocationPosition() async {
     // ignore: deprecated_member_use

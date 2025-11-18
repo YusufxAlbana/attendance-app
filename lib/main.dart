@@ -1,6 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:attendance_app/screen/splash_screen.dart';
+import 'package:attendance_app/providers/firebase_auth_provider.dart';
+import 'package:attendance_app/providers/attendance_provider.dart';
 
 
 Future<void> main() async {
@@ -34,9 +37,15 @@ class TestApp extends StatelessWidget {
 
   @override // can give information about about your missing override code
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false, // remove debug banner
-      home: const SplashScreen(), // SplashScreen class
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => FirebaseAuthProvider()),
+        ChangeNotifierProvider(create: (_) => AttendanceProvider()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false, // remove debug banner
+        home: const SplashScreen(), // SplashScreen class
+      ),
     );
   }
 }

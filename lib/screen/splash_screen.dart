@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:attendance_app/ui/home_screen.dart';
+import 'package:attendance_app/screen/auth/login_screen.dart';
+import 'package:attendance_app/providers/firebase_auth_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -68,12 +71,16 @@ class _SplashScreenState extends State<SplashScreen>
     _bubbleController.repeat();
     _waveController.repeat();
 
-    // Navigate to home after 2.5 seconds
+    // Navigate after 2.5 seconds
     Timer(const Duration(milliseconds: 2500), () {
+      final authProvider = Provider.of<FirebaseAuthProvider>(context, listen: false);
+      
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
-              const HomeScreen(),
+              authProvider.isAuthenticated
+                  ? const HomeScreen()
+                  : const LoginScreen(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(opacity: animation, child: child);
           },
