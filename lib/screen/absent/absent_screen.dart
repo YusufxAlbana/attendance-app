@@ -55,7 +55,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
       content: Row(
         children: [
           const CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
           ),
           Container(
             margin: const EdgeInsets.only(left: 20),
@@ -197,8 +197,8 @@ class _AbsentScreenState extends State<AbsentScreen> {
     Size size = MediaQuery.of(context).size;
 
     // theme colors (same as home)
-    const Color primary1 = Color(0xFF2563EB);
-    const Color primary2 = Color(0xFF0EA5E9);
+    const Color primary1 = Color(0xFF667EEA);
+    const Color primary2 = Color(0xFF764BA2);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -286,11 +286,11 @@ class _AbsentScreenState extends State<AbsentScreen> {
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFF2563EB)),
+                      borderSide: const BorderSide(color: Colors.blueAccent),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFF2563EB)),
+                      borderSide: const BorderSide(color: Colors.blueAccent),
                     ),
                   ),
                 ),
@@ -315,7 +315,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: Color(0xFF2563EB),
+                      color: Colors.blueAccent,
                       style: BorderStyle.solid,
                       width: 1,
                     ),
@@ -383,11 +383,11 @@ class _AbsentScreenState extends State<AbsentScreen> {
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFF2563EB)),
+                      borderSide: const BorderSide(color: Colors.blueAccent),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Color(0xFF2563EB)),
+                      borderSide: const BorderSide(color: Colors.blueAccent),
                     ),
                   ),
                 ),
@@ -458,12 +458,12 @@ class _AbsentScreenState extends State<AbsentScreen> {
                                         colorScheme: const ColorScheme.light(
                                           onPrimary: Colors.white,
                                           onSurface: Colors.black,
-                                          primary: Color(0xFF2563EB),
+                                          primary: Colors.blueAccent,
                                         ),
                                         datePickerTheme:
                                             const DatePickerThemeData(
                                               headerBackgroundColor:
-                                                  Color(0xFF2563EB),
+                                                  Colors.blueAccent,
                                               backgroundColor: Colors.white,
                                               headerForegroundColor:
                                                   Colors.white,
@@ -521,7 +521,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                     ),
                     child: Material(
                       borderRadius: BorderRadius.circular(20),
-                      color: Color(0xFF2563EB),
+                      color: Colors.blueAccent,
                       child: InkWell(
                         splashColor: Colors.blue,
                         borderRadius: BorderRadius.circular(20),
@@ -545,7 +545,7 @@ class _AbsentScreenState extends State<AbsentScreen> {
                                     ),
                                   ],
                                 ),
-                                backgroundColor: Color(0xFF2563EB),
+                                backgroundColor: Colors.blueAccent,
                                 shape: StadiumBorder(),
                                 behavior: SnackBarBehavior.floating,
                               ),
